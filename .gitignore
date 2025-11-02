@@ -1,0 +1,27 @@
+# Virtual environment
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Panel/Bokeh cache
+.panel_cache/
+.bokeh/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
