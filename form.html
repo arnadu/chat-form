@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GDPR Assessment Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .form-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #007acc;
+            padding-bottom: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+            vertical-align: top;
+        }
+        
+        th {
+            background-color: #007acc;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        .help-btn {
+            background: #007acc;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        
+        .help-btn:hover {
+            background: #005299;
+        }
+        
+        .instructions {
+            display: none;
+            background: #e7f3ff;
+            padding: 8px;
+            margin-top: 4px;
+            border-radius: 4px;
+            border-left: 3px solid #007acc;
+            font-size: 14px;
+        }
+        
+        .instructions.show {
+            display: block;
+        }
+        
+        .question-cell {
+            min-width: 200px;
+        }
+        
+        .id-cell {
+            width: 80px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>🛡️ GDPR Data Processing Assessment</h1>
+        
+        <table id="assessmentTable">
+            <thead>
+                <tr>
+                    <th class="id-cell">ID</th>
+                    <th class="question-cell">Question</th>
+                    <th>Answer</th>
+                    <th>Rationale</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Questions will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Form questions data
+        const formQuestions = [
+            {
+                id: "1.1",
+                question: "What is the name of your data processing activity?",
+                instructions: "Provide a clear, descriptive name for this specific data processing activity (e.g., 'Customer Support Ticket System', 'Employee Payroll Processing').",
+                widget_type: "text"
+            },
+            {
+                id: "1.2.1",
+                question: "Describe the purpose of the data processing",
+                instructions: "Explain why you are processing personal data. Be specific about the business purpose and what you aim to achieve.",
+                widget_type: "textarea"
+            },
+            {
+                id: "1.2.2",
+                question: "What categories of personal data are processed?",
+                instructions: "List the types of personal data involved (e.g., names, email addresses, phone numbers, IP addresses, cookies, etc.).",
+                widget_type: "textarea"
+            },
+            {
+                id: "2.1",
+                question: "Who are the data subjects?",
+                instructions: "Identify whose personal data you are processing (e.g., customers, employees, website visitors, suppliers).",
+                widget_type: "textarea"
+            },
+            {
+                id: "2.2",
+                question: "What is your legal basis for processing?",
+                instructions: "Select the GDPR legal basis that applies to this processing activity. Choose the most appropriate one.",
+                widget_type: "select",
+                options: ["Consent", "Contract", "Legal Obligation", "Vital Interests", "Public Task", "Legitimate Interests"]
+            }
+        ];
+
+        // Generate table rows
+        function generateFormRows() {
+            const tbody = document.querySelector('#assessmentTable tbody');
+            
+            formQuestions.forEach(question => {
+                const row = document.createElement('tr');
+                
+                // ID cell
+                const idCell = document.createElement('td');
+                idCell.className = 'id-cell';
+                idCell.innerHTML = `<strong>${question.id}</strong>`;
+                row.appendChild(idCell);
+                
+                // Question cell with help button
+                const questionCell = document.createElement('td');
+                questionCell.className = 'question-cell';
+                questionCell.innerHTML = `
+                    <div>
+                        ${question.question}
+                        <button class="help-btn" onclick="toggleInstructions('${question.id}')" title="Show/hide instructions">?</button>
+                    </div>
+                    <div id="instructions_${question.id}" class="instructions">
+                        ${question.instructions}
+                    </div>
+                `;
+                row.appendChild(questionCell);
+                
+                // Answer cell
+                const answerCell = document.createElement('td');
+                const safeId = question.id.replace('.', '_');
+                
+                let inputHtml;
+                if (question.widget_type === 'textarea') {
+                    inputHtml = `<textarea id="answer_${safeId}" name="answer_${safeId}" placeholder="Enter answer..." onchange="notifyParent()"></textarea>`;
+                } else if (question.widget_type === 'select') {
+                    let options = '<option value="">Select...</option>';
+                    if (question.options) {
+                        question.options.forEach(opt => {
+                            options += `<option value="${opt}">${opt}</option>`;
+                        });
+                    }
+                    inputHtml = `<select id="answer_${safeId}" name="answer_${safeId}" onchange="notifyParent()">${options}</select>`;
+                } else {
+                    inputHtml = `<input type="text" id="answer_${safeId}" name="answer_${safeId}" placeholder="Enter answer..." onchange="notifyParent()">`;
+                }
+                
+                answerCell.innerHTML = inputHtml;
+                row.appendChild(answerCell);
+                
+                // Rationale cell
+                const rationaleCell = document.createElement('td');
+                rationaleCell.innerHTML = `<textarea id="rationale_${safeId}" name="rationale_${safeId}" placeholder="Explain rationale..." onchange="notifyParent()"></textarea>`;
+                row.appendChild(rationaleCell);
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Toggle instructions visibility
+        function toggleInstructions(questionId) {
+            const instructions = document.getElementById(`instructions_${questionId}`);
+            const button = event.target;
+            
+            if (instructions.classList.contains('show')) {
+                instructions.classList.remove('show');
+                button.textContent = '?';
+            } else {
+                instructions.classList.add('show');
+                button.textContent = '✕';
+            }
+        }
+
+        // Notify of changes (for potential Panel integration)
+        function notifyParent() {
+            const formData = {};
+            const inputs = document.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                if (input.value) {
+                    formData[input.name] = input.value;
+                }
+            });
+            
+            // Send data to parent window or console
+            if (window.updateFormData) {
+                window.updateFormData(formData);
+            } else {
+                console.log('Form data updated:', formData);
+            }
+        }
+
+        // Function to update form from external data
+        function updateForm(data) {
+            formQuestions.forEach(question => {
+                const safeId = question.id.replace('.', '_');
+                const answerField = document.getElementById(`answer_${safeId}`);
+                const rationaleField = document.getElementById(`rationale_${safeId}`);
+                
+                if (data[question.id] && data[question.id].answer) {
+                    answerField.value = data[question.id].answer;
+                }
+                if (data[question.id] && data[question.id].rationale) {
+                    rationaleField.value = data[question.id].rationale;
+                }
+            });
+        }
+
+        // Make updateForm available globally for parent window access
+        window.updateForm = updateForm;
+
+        // Initialize form when page loads
+        document.addEventListener('DOMContentLoaded', generateFormRows);
+    </script>
+</body>
+</html>
