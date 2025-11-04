@@ -138,32 +138,46 @@ class SimpleFormApp(param.Parameterized):
             show_index=False,
             configuration={
                 'columns': [
-                    {'field': 'ID', 'title': 'ID', 'width': 80, 'editor': False},
+                    {
+                        'field': 'ID', 
+                        'title': 'ID', 
+                        'width': 80, 
+                        'editor': False,
+                        'headerWordWrap': True
+                    },
                     {
                         'field': 'Question', 
                         'title': 'Question', 
                         'width': 200, 
                         'editor': False,
-                        'formatter': 'textarea'
+                        'formatter': 'textarea',
+                        'headerWordWrap': True,
+                        'variableHeight': True
                     },
                     {
                         'field': 'Answer', 
                         'title': 'Answer', 
                         'editor': 'textarea',
-                        'formatter': 'textarea'
+                        'formatter': 'textarea',
+                        'headerWordWrap': True,
+                        'variableHeight': True
                     },
                     {
                         'field': 'Rationale', 
                         'title': 'Rationale', 
                         'editor': 'textarea', 
-                        'formatter': 'textarea'
+                        'formatter': 'textarea',
+                        'headerWordWrap': True,
+                        'variableHeight': True
                     }
                 ],
                 'layout': 'fitColumns',
                 'resizableColumns': True,
                 'movableColumns': False,
                 'selectable': True,
-                'cellEdited': True
+                'cellEdited': True,
+                'wordWrap': True,
+                'variableHeight': True
             }
         )
         
