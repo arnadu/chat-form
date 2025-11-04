@@ -124,7 +124,6 @@ class SimpleFormApp(param.Parameterized):
     def __init__(self, **params):
         super().__init__(**params)
         self.setup_ui()
-        form_state.add_change_callback(self.on_form_change)
     
     def setup_ui(self):
         """Set up the user interface"""
@@ -170,22 +169,6 @@ class SimpleFormApp(param.Parameterized):
         
         # No automatic watching - we'll sync manually when sending chat messages
         
-        # Create instructions panel
-        self.instructions_pane = pn.pane.Markdown(
-            "**Instructions:** Click on any row to see detailed instructions below.",
-            margin=(10, 5),
-            styles={'background': '#f0f8ff', 'padding': '10px', 'border-radius': '4px'}
-        )
-        
-        # Create status display
-        self.status_display = pn.pane.Markdown(
-            f"**Status:** Ready | Template has {len(FORM_TEMPLATE)} questions | Updates: {form_state.update_count}",
-            margin=(10, 5)
-        )
-        
-        # Add row selection callback
-        self.tabulator.on_click(self.on_row_click)
-        
         # Create control buttons
         self.clear_btn = pn.widgets.Button(
             name="🗑️ Clear All", 
@@ -193,24 +176,7 @@ class SimpleFormApp(param.Parameterized):
             margin=(5, 5)
         )
         self.clear_btn.on_click(self.clear_all_data)
-    
 
-    
-    def on_form_change(self, old_df, new_df):
-        """Handle changes in form state"""
-        self.status_display.object = f"**Status:** Updated | Template: {len(FORM_TEMPLATE)} questions | Updates: {form_state.update_count} | Last: {form_state.last_updated}"
-    
-    def on_row_click(self, event):
-        """Handle row clicks to show instructions"""
-        if hasattr(event, 'row') and event.row is not None:
-            try:
-                row_data = form_state.form_data.iloc[event.row]
-                question_id = row_data['ID']
-                instructions = row_data['Instructions']
-                
-                self.instructions_pane.object = f"**Instructions for {question_id}:**\n\n{instructions}"
-            except:
-                self.instructions_pane.object = "**Instructions:** Click on a table row to see detailed instructions."
     
     def clear_all_data(self, event):
         """Clear all form data"""
@@ -260,14 +226,8 @@ class SimpleFormApp(param.Parameterized):
             ),
             pn.Column(
                 "# 📊 Simple DataFrame Form",
-                self.status_display,
                 self.clear_btn,
                 self.tabulator,
-                self.instructions_pane,
-                pn.Accordion(
-                    ("📊 Current Data", pn.pane.DataFrame(form_state.param.form_data, sizing_mode='stretch_width')),
-                    margin=(10, 0)
-                ),
                 sizing_mode="stretch_both"
             ),
             min_height=700,
